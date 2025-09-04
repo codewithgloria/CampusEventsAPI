@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 class Event(models.Model):
     CATEGORY_CHOICES = [
@@ -32,5 +33,33 @@ class Event(models.Model):
 
     @property
     def is_upcoming(self):
-        from django.utils import timezone
         return self.date_time > timezone.now()
+    
+    class Meta:
+        ordering = ['-date_time']
+
+class Registration(models.Model):
+    STATUS_CHOICES = [
+        ('attending', 'Attending'),
+        ('waitlist', 'Waitlist'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='registrations'
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='registrations'
+    )
+    registered_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='attending')
+
+    class Meta:   
+        unique_together = ('user', 'event')  # prevents duplicate registrations
+        ordering = ['registered_at']
+
+    def __str__(self):
+        return f"{self.user.username} → {self.event.title}"     
