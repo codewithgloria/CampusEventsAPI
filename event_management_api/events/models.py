@@ -1,24 +1,29 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
+from django.conf import settings
 
 class Event(models.Model):
     CATEGORY_CHOICES = [
-        ('tech', 'Technology'),
-        ('music', 'Music'),
-        ('sports', 'Sports'),
-        ('education', 'Education'),
+        ('academic', 'Academic'),
         ('social', 'Social'),
+        ('career', 'Career'),
+        ('sports', 'Sports'),
     ]
 
     title = models.CharField(max_length=200)
     description = models.TextField()
-    location = models.CharField(max_length=200)
     date_time = models.DateTimeField()
+    location = models.CharField(max_length=200)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organized_events')
-    image = models.ImageField(upload_to='event_images/', null=True, blank=True)
     capacity = models.PositiveIntegerField()
+    image = models.ImageField(upload_to='event_images/', null=True, blank=True)
+
+    # way to reference custom user
+    organizer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='organized_events'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -27,4 +32,5 @@ class Event(models.Model):
 
     @property
     def is_upcoming(self):
+        from django.utils import timezone
         return self.date_time > timezone.now()
