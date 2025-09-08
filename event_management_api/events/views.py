@@ -6,11 +6,11 @@ from rest_framework.response import Response
 from .models import Event, Registration
 from .serializers import EventSerializer, RegistrationSerializer
 from users.models import CustomUser
+from .permissions import IsFacultyOrAdmin, IsOrganizerOrReadOnly
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all().order_by('-date_time')
     serializer_class = EventSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'location', 'organizer']
     search_fields = ['title', 'description']
@@ -24,6 +24,15 @@ class EventViewSet(viewsets.ModelViewSet):
         elif upcoming == 'false':
             queryset = queryset.filter(date_time__lt=timezone.now())
         return queryset
+    
+    def get_permissions(self):
+        if self.action == 'create':
+            self.permission_classes = [IsFacultyOrAdmin]
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            self.permission_classes = [IsOrganizerOrReadOnly]
+        else:
+            self.permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+        return super().get_permissions()
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def register(self, request, pk=None):
