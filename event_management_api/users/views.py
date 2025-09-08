@@ -4,6 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from django.contrib.auth import login
 from rest_framework.views import APIView
+from users.models import CustomUser
 from .serializers import UserSerializer, UserRegistrationSerializer
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -12,10 +13,18 @@ class UserRegistrationView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        user = response.data
-        token, created = Token.objects.get_or_create(user=self.request.user)
+        
+        # extract username from response data
+        username = response.data['username']
+
+        # get the user from the database
+        User = get_user_model()
+        user = User.objects.get(username=username)
+     
+        # token created for user
+        token, created = Token.objects.get_or_create(user=user)
         return Response({
-            'user': user,
+            'user': response.data,
             'token': token.key
         })
 
