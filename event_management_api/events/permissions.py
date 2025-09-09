@@ -5,8 +5,9 @@ class IsFacultyOrAdmin(permissions.BasePermission):
     Allow only faculty or admin to create or edit events.
     """
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
+        # If not authenticated, deny access
+        if not request.user.is_authenticated:
+            return False
         # For POST, PUT, DELETE must be faculty or admin
         return request.user.role in ['faculty', 'admin']
 
