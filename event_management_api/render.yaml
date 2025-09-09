@@ -3,7 +3,7 @@ services:
     name: campus-events-api
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn event_management_api.wsgi:application
+    startCommand: gunicorn event_management_api/event_management_api.wsgi:application
     envVars:
       - key: DEBUG
         value: False
