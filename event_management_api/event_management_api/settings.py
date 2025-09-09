@@ -26,7 +26,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*8mtor-32k03j+%2u1dpb=b72l^!rt&j-ih0@jwla_f%yc-!%p'
+SECRET_KEY = SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -89,7 +89,8 @@ WSGI_APPLICATION = 'event_management_api.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
-
+# For development only
+os.environ.setdefault('DATABASE_URL', 'sqlite:///db.sqlite3')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
